@@ -37,8 +37,8 @@ export default function App() {
       className="flex flex-col justify-between w-full min-h-screen bg-cover bg-center text-white transition-all duration-500"
       style={{
         backgroundImage: showFrames
-          ? "url('/background/background2.jpg')"
-          : "url('/background/background1.png')",
+          ? "url('background/background2.jpg')"
+          : "url('background/background1.png')",
       }}
     >
       {/* 上方標題區塊 */}

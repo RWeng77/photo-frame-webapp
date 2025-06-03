@@ -1,12 +1,12 @@
 // components/FrameSelector.jsx
 export default function FrameSelector({ setFrame }) {
   const frames = [
-    "/frames/frame1.png",
-    "/frames/frame2.png",
-    "/frames/frame3.png",
-    "/frames/frame4.png",
-    "/frames/frame5.png",
-    "/frames/frame6.png",
+    "frames/frame1.png",
+    "frames/frame2.png",
+    "frames/frame3.png",
+    "frames/frame4.png",
+    "frames/frame5.png",
+    "frames/frame6.png",
   ];
 
   return (
