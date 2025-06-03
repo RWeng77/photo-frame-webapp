@@ -15,6 +15,7 @@ export default function FrameSelector({ setFrame }) {
         <button
           key={index}
           onClick={() => setFrame(src)}
+          style={{ backgroundColor: "#9b8659" }}
           className="relative w-36 h-36 border-2 border-yellow-600 rounded overflow-hidden shadow-lg"
         >
           <img
@@ -22,9 +23,6 @@ export default function FrameSelector({ setFrame }) {
             alt={`相框 ${index + 1}`}
             className="object-contain w-full h-full"
           />
-          <div className="absolute bottom-0 bg-yellow-800 bg-opacity-75 text-white text-xs w-full text-center py-1">
-            模板 {index + 1}
-          </div>
         </button>
       ))}
     </div>
