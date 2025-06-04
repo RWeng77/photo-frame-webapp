@@ -56,7 +56,7 @@ export default function App() {
       </div>
 
       {/* 中下功能區塊 */}
-      <div className="flex flex-col items-center justify-center text-center pb-40 space-y-4 max-w-md mx-auto">
+      <div className="flex flex-col items-center justify-center text-center pb-32 space-y-4 max-w-md mx-auto">
         {showInitialText && <p className="text-2xl pb-10">FCU 113</p>}
 
         {!showFrames && !frameSelected && (
