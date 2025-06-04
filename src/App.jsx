@@ -94,16 +94,29 @@ export default function App() {
 
             {/* 上傳/重新上傳按鈕 */}
             {!image && (
-              <label className="bg-yellow-800 text-white px-6 py-3 rounded-full text-sm cursor-pointer inline-block">
-                上傳照片
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  className="hidden"
-                  ref={fileInputRef}
-                />
-              </label>
+              <div className="flex flex-col items-center gap-2 mt-4">
+                <label className="bg-yellow-800 text-white px-6 py-3 rounded-full text-sm cursor-pointer inline-block">
+                  上傳照片
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                    ref={fileInputRef}
+                  />
+                </label>
+                <button
+                  onClick={() => {
+                    setImage(null);
+                    setFrameSelected(false);
+                    setShowFrames(false);
+                    setEditingMode(false);
+                  }}
+                  className="bg-gray-600 text-white px-4 py-2 rounded"
+                >
+                  回到首頁
+                </button>
+              </div>
             )}
 
             {image && (
@@ -127,6 +140,17 @@ export default function App() {
                   className="bg-yellow-700 text-white px-4 py-2 rounded"
                 >
                   重新上傳
+                </button>
+                <button
+                  onClick={() => {
+                    setImage(null);
+                    setFrameSelected(false);
+                    setShowFrames(false);
+                    setEditingMode(false);
+                  }}
+                  className="bg-gray-600 text-white px-4 py-2 rounded"
+                >
+                  回到首頁
                 </button>
               </div>
             )}
