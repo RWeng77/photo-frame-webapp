@@ -4,7 +4,7 @@ import CanvasEditor from "./components/CanvasEditor";
 
 export default function App() {
   const [image, setImage] = useState(null);
-  const [frame, setFrame] = useState("/frames/frame1.png");
+  const [frame, setFrame] = useState("/photo-frame-webapp/frames/frame1.png");
   const [showFrames, setShowFrames] = useState(false);
   const [frameSelected, setFrameSelected] = useState(false);
   const [editingMode, setEditingMode] = useState(false);
@@ -29,6 +29,8 @@ export default function App() {
     setFrameSelected(true);
   };
 
+  const isIphone = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+
   const showInitialText = !showFrames && !frameSelected;
   const showFrameTitle = showFrames && !frameSelected;
 
@@ -37,8 +39,9 @@ export default function App() {
       className="flex flex-col justify-between w-full min-h-screen bg-cover bg-center text-white transition-all duration-500"
       style={{
         backgroundImage: showFrames
-          ? "url('background/background2.jpg')"
-          : "url('background/background1.png')",
+          ? "url('/photo-frame-webapp/background/background2.jpg')"
+          : "url('/photo-frame-webapp/background/background1.png')",
+        fontFamily: "SimSun, '宋体', serif"
       }}
     >
       {/* 上方標題區塊 */}
@@ -54,7 +57,7 @@ export default function App() {
 
       {/* 中下功能區塊 */}
       <div className="flex flex-col items-center justify-center text-center pb-40 space-y-4 max-w-md mx-auto">
-        {showInitialText && <p className="text-2xl pb-20">FCU 113</p>}
+        {showInitialText && <p className="text-2xl pb-10">FCU 113</p>}
 
         {!showFrames && !frameSelected && (
           <button
@@ -82,7 +85,7 @@ export default function App() {
               <img
                 src={frame}
                 alt="選擇的相框預覽"
-                className="object-contain max-h-full max-w-full z-10 border border-yellow-500 shadow-lg"
+                className="object-contain max-h-full max-w-full z-10 border-4 border-white shadow-lg"
               />
               <div className="absolute bottom-2 right-2 animate-bounce text-yellow-100 text-sm z-20">
                 預覽中
@@ -104,7 +107,12 @@ export default function App() {
             )}
 
             {image && (
-              <div className="flex gap-4 mt-4">
+              <div className="flex flex-col items-center gap-2 mt-4">
+                {isIphone && (
+                  <p className="text-sm text-yellow-300">
+                    注意：iPhone 用戶請點擊下方按鈕，然後長按圖片選擇「儲存圖片」
+                  </p>
+                )}
                 <button
                   onClick={() => setEditingMode(true)}
                   className="bg-blue-600 text-white px-4 py-2 rounded"
@@ -130,6 +138,7 @@ export default function App() {
           <CanvasEditor
             image={image}
             frame={frame}
+            isIphone={isIphone}
             onResetImage={() => {
               setImage(null);
               setEditingMode(false);

@@ -1,9 +1,12 @@
 import { useRef, useEffect, useState } from "react";
 
-export default function CanvasEditor({ image, frame, onResetImage, onResetFrame }) {
+export default function CanvasEditor({ image, frame, isIphone, onResetImage, onResetFrame }) {
   const canvasRef = useRef(null);
   const [scale, setScale] = useState(1);
   const [rotation, setRotation] = useState(0);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [dragging, setDragging] = useState(false);
+  const [offset, setOffset] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -18,7 +21,7 @@ export default function CanvasEditor({ image, frame, onResetImage, onResetFrame 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         ctx.save();
-        ctx.translate(canvas.width / 2, canvas.height / 2);
+        ctx.translate(canvas.width / 2 + position.x, canvas.height / 2 + position.y);
         ctx.rotate((rotation * Math.PI) / 180);
 
         const frameAspect = frm.width / frm.height;
@@ -43,14 +46,55 @@ export default function CanvasEditor({ image, frame, onResetImage, onResetFrame 
 
     img.onload = drawCanvas;
     img.src = image;
-  }, [image, frame, scale, rotation]);
+  }, [image, frame, scale, rotation, position]);
+
+  // 取得滑鼠或觸控位置
+  const getCanvasPos = (e) => {
+    const rect = canvasRef.current.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return {
+      x: clientX - rect.left,
+      y: clientY - rect.top,
+    };
+  };
+
+  const handleStart = (e) => {
+    e.preventDefault();
+    setDragging(true);
+    const pos = getCanvasPos(e);
+    const canvas = canvasRef.current;
+    setOffset({
+      x: pos.x - canvas.width / 2 - position.x,
+      y: pos.y - canvas.height / 2 - position.y,
+    });
+  };
+
+  const handleMove = (e) => {
+    if (!dragging) return;
+    const pos = getCanvasPos(e);
+    const canvas = canvasRef.current;
+    setPosition({
+      x: pos.x - canvas.width / 2 - offset.x,
+      y: pos.y - canvas.height / 2 - offset.y,
+    });
+  };
+
+  const handleEnd = () => {
+    setDragging(false);
+  };
 
   const download = () => {
     const url = canvasRef.current.toDataURL("image/png");
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "framed_image.png";
-    a.click();
+    if (isIphone) {
+      const imgWindow = window.open();
+      imgWindow.document.write(`<img src="${url}" style="width:100%" />`);
+    } else {
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "framed_image.png";
+      a.click();
+    }
   };
 
   return (
@@ -59,7 +103,14 @@ export default function CanvasEditor({ image, frame, onResetImage, onResetFrame 
         <canvas
           ref={canvasRef}
           className="border my-4 mx-auto max-w-full"
-          style={{ width: "100%", height: "auto" }}
+          style={{ width: "100%", height: "auto", touchAction: "none" }}
+          onMouseDown={handleStart}
+          onMouseMove={handleMove}
+          onMouseUp={handleEnd}
+          onMouseLeave={handleEnd}
+          onTouchStart={handleStart}
+          onTouchMove={handleMove}
+          onTouchEnd={handleEnd}
         />
       </div>
 
@@ -92,7 +143,7 @@ export default function CanvasEditor({ image, frame, onResetImage, onResetFrame 
           onClick={download}
           className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-full"
         >
-          下載圖片
+          {isIphone ? "開啟圖片儲存" : "下載圖片"}
         </button>
         <button
           onClick={onResetImage}

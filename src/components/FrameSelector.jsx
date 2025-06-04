@@ -16,7 +16,7 @@ export default function FrameSelector({ setFrame }) {
           key={index}
           onClick={() => setFrame(src)}
           style={{ backgroundColor: "#9b8659" }}
-          className="relative w-36 h-36 border-2 border-yellow-600 rounded overflow-hidden shadow-lg"
+          className="relative w-36 h-36 border-4 border-white rounded overflow-hidden shadow-lg"
         >
           <img
             src={src}
