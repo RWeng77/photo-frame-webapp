@@ -7,6 +7,9 @@ export default function CanvasEditor({ image, frame, isIphone, onResetImage, onR
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [dragging, setDragging] = useState(false);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const [touchDistance, setTouchDistance] = useState(null);
+  const [initialRotation, setInitialRotation] = useState(null);
+  const [frameImage, setFrameImage] = useState(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -14,41 +17,44 @@ export default function CanvasEditor({ image, frame, isIphone, onResetImage, onR
     const img = new Image();
     const frm = new Image();
 
-    const drawCanvas = () => {
-      frm.onload = () => {
-        canvas.width = frm.width;
-        canvas.height = frm.height;
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        ctx.save();
-        ctx.translate(canvas.width / 2 + position.x, canvas.height / 2 + position.y);
-        ctx.rotate((rotation * Math.PI) / 180);
-
-        const frameAspect = frm.width / frm.height;
-        const imageAspect = img.width / img.height;
-        let drawWidth, drawHeight;
-
-        if (imageAspect > frameAspect) {
-          drawWidth = frm.width * scale;
-          drawHeight = (frm.width / imageAspect) * scale;
-        } else {
-          drawHeight = frm.height * scale;
-          drawWidth = (frm.height * imageAspect) * scale;
-        }
-
-        ctx.drawImage(img, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight);
-        ctx.restore();
-
-        ctx.drawImage(frm, 0, 0, canvas.width, canvas.height);
-      };
-      frm.src = frame;
+    frm.onload = () => {
+      setFrameImage(frm);
     };
+    frm.src = frame;
 
-    img.onload = drawCanvas;
+    img.onload = () => {
+      if (!frameImage) return;
+
+      const scaledWidth = frameImage.width * 0.8;
+      const scaledHeight = frameImage.height * 0.8;
+      canvas.width = scaledWidth;
+      canvas.height = scaledHeight;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      ctx.save();
+      ctx.translate(canvas.width / 2 + position.x, canvas.height / 2 + position.y);
+      ctx.rotate((rotation * Math.PI) / 180);
+
+      const frameAspect = frameImage.width / frameImage.height;
+      const imageAspect = img.width / img.height;
+      let drawWidth, drawHeight;
+
+      if (imageAspect > frameAspect) {
+        drawWidth = scaledWidth * scale;
+        drawHeight = (scaledWidth / imageAspect) * scale;
+      } else {
+        drawHeight = scaledHeight * scale;
+        drawWidth = (scaledHeight * imageAspect) * scale;
+      }
+
+      ctx.drawImage(img, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight);
+      ctx.restore();
+
+      ctx.drawImage(frameImage, 0, 0, scaledWidth, scaledHeight);
+    };
     img.src = image;
-  }, [image, frame, scale, rotation, position]);
+  }, [image, frameImage, scale, rotation, position]);
 
-  // 取得滑鼠或觸控位置
   const getCanvasPos = (e) => {
     const rect = canvasRef.current.getBoundingClientRect();
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -61,27 +67,62 @@ export default function CanvasEditor({ image, frame, isIphone, onResetImage, onR
 
   const handleStart = (e) => {
     e.preventDefault();
-    setDragging(true);
-    const pos = getCanvasPos(e);
-    const canvas = canvasRef.current;
-    setOffset({
-      x: pos.x - canvas.width / 2 - position.x,
-      y: pos.y - canvas.height / 2 - position.y,
-    });
+    if (e.touches && e.touches.length === 2) {
+      const dist = getTouchDistance(e.touches);
+      setTouchDistance(dist);
+      setInitialRotation(getTouchAngle(e.touches));
+    } else {
+      setDragging(true);
+      const pos = getCanvasPos(e);
+      const canvas = canvasRef.current;
+      setOffset({
+        x: pos.x - canvas.width / 2 - position.x,
+        y: pos.y - canvas.height / 2 - position.y,
+      });
+    }
   };
 
   const handleMove = (e) => {
-    if (!dragging) return;
-    const pos = getCanvasPos(e);
-    const canvas = canvasRef.current;
-    setPosition({
-      x: pos.x - canvas.width / 2 - offset.x,
-      y: pos.y - canvas.height / 2 - offset.y,
-    });
+    if (e.touches && e.touches.length === 2) {
+      const newDist = getTouchDistance(e.touches);
+      const newAngle = getTouchAngle(e.touches);
+
+      if (touchDistance !== null && initialRotation !== null) {
+        const scaleChange = newDist / touchDistance;
+        setScale((prevScale) => Math.min(2, Math.max(0.5, prevScale * scaleChange)));
+
+        const rotationChange = newAngle - initialRotation;
+        setRotation((prevRotation) => prevRotation + rotationChange);
+        setInitialRotation(newAngle);
+      }
+
+      setTouchDistance(newDist);
+    } else if (dragging) {
+      const pos = getCanvasPos(e);
+      const canvas = canvasRef.current;
+      setPosition({
+        x: pos.x - canvas.width / 2 - offset.x,
+        y: pos.y - canvas.height / 2 - offset.y,
+      });
+    }
   };
 
   const handleEnd = () => {
     setDragging(false);
+    setTouchDistance(null);
+    setInitialRotation(null);
+  };
+
+  const getTouchDistance = (touches) => {
+    const dx = touches[0].clientX - touches[1].clientX;
+    const dy = touches[0].clientY - touches[1].clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+  };
+
+  const getTouchAngle = (touches) => {
+    const dx = touches[1].clientX - touches[0].clientX;
+    const dy = touches[1].clientY - touches[0].clientY;
+    return (Math.atan2(dy, dx) * 180) / Math.PI;
   };
 
   const download = () => {
@@ -103,7 +144,7 @@ export default function CanvasEditor({ image, frame, isIphone, onResetImage, onR
         <canvas
           ref={canvasRef}
           className="border my-4 mx-auto max-w-full"
-          style={{ width: "100%", height: "auto", touchAction: "none" }}
+          style={{ width: "80%", height: "80%", touchAction: "none" }}
           onMouseDown={handleStart}
           onMouseMove={handleMove}
           onMouseUp={handleEnd}
@@ -115,18 +156,7 @@ export default function CanvasEditor({ image, frame, isIphone, onResetImage, onR
       </div>
 
       <div className="flex flex-col gap-2">
-        <label className="text-sm">縮放：</label>
-        <input
-          type="range"
-          min="0.5"
-          max="2"
-          step="0.01"
-          value={scale}
-          onChange={(e) => setScale(parseFloat(e.target.value))}
-          className="w-full"
-        />
-
-        <label className="text-sm mt-2">旋轉角度（度）：</label>
+        <label className="text-sm">旋轉角度（度）：</label>
         <input
           type="range"
           min="-180"
