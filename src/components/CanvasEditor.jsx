@@ -25,8 +25,8 @@ export default function CanvasEditor({ image, frame, isIphone, onResetImage, onR
     img.onload = () => {
       if (!frameImage) return;
 
-      const scaledWidth = frameImage.width * 0.8;
-      const scaledHeight = frameImage.height * 0.8;
+      const scaledWidth = frameImage.width;
+      const scaledHeight = frameImage.height;
       canvas.width = scaledWidth;
       canvas.height = scaledHeight;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
