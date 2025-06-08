@@ -10,6 +10,7 @@ export default function CanvasEditor({ image, frame, isIphone, onResetImage, onR
   const [touchDistance, setTouchDistance] = useState(null);
   const [initialRotation, setInitialRotation] = useState(null);
   const [frameImage, setFrameImage] = useState(null);
+  const [quality, setQuality] = useState(0.92);
 
   useEffect(() => {
     setScale(1);
@@ -124,14 +125,14 @@ export default function CanvasEditor({ image, frame, isIphone, onResetImage, onR
   };
 
   const download = () => {
-    const url = canvasRef.current.toDataURL("image/png");
+    const url = canvasRef.current.toDataURL("image/jpeg", quality);
     if (isIphone) {
       const imgWindow = window.open();
       imgWindow.document.write(`<img src="${url}" style="width:100%" />`);
     } else {
       const a = document.createElement("a");
       a.href = url;
-      a.download = "framed_image.png";
+      a.download = "framed_image.jpeg";
       a.click();
     }
   };
@@ -162,6 +163,19 @@ export default function CanvasEditor({ image, frame, isIphone, onResetImage, onR
           step="1"
           value={rotation}
           onChange={(e) => setRotation(parseInt(e.target.value))}
+          className="w-full"
+        />
+      </div>
+
+      <div className="flex flex-col gap-2 mt-2">
+        <label className="text-sm">圖片壓縮程度：</label>
+        <input
+          type="range"
+          min="0.1"
+          max="1"
+          step="0.01"
+          value={quality}
+          onChange={(e) => setQuality(parseFloat(e.target.value))}
           className="w-full"
         />
       </div>
