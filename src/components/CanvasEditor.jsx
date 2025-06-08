@@ -10,7 +10,7 @@ export default function CanvasEditor({ image, frame, isIphone, onResetImage, onR
   const [touchDistance, setTouchDistance] = useState(null);
   const [initialRotation, setInitialRotation] = useState(null);
   const [frameImage, setFrameImage] = useState(null);
-  const [quality, setQuality] = useState(0.92);
+  const [quality, setQuality] = useState(0.50);
 
   useEffect(() => {
     setScale(1);
@@ -168,7 +168,7 @@ export default function CanvasEditor({ image, frame, isIphone, onResetImage, onR
       </div>
 
       <div className="flex flex-col gap-2 mt-2">
-        <label className="text-sm">圖片壓縮程度：</label>
+        <label className="text-sm">圖片品質(建議 50%)：</label>
         <input
           type="range"
           min="0.1"
