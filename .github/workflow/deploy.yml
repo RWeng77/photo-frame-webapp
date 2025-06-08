@@ -24,13 +24,13 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20' # 您可以根據需要調整 Node.js 版本
+          node-version: '20'
           cache: 'npm'
-          cache-dependency-path: ./package-lock.json # 或 yarn.lock
+          cache-dependency-path: ./package-lock.json
 
       - name: Install dependencies
         working-directory: ./
-        run: npm ci # 使用 npm ci 更適合 CI 環境
+        run: npm ci
 
       - name: Build project
         working-directory: ./
