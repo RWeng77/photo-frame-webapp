@@ -10,6 +10,13 @@ export default function CanvasEditor({ image, frame, isIphone, onResetImage, onR
   const [touchDistance, setTouchDistance] = useState(null);
   const [initialRotation, setInitialRotation] = useState(null);
   const [frameImage, setFrameImage] = useState(null);
+  const [quality, setQuality] = useState(0.65);
+
+  useEffect(() => {
+    setScale(1);
+    setRotation(0);
+    setPosition({ x: 0, y: 0 });
+  }, [image]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -25,43 +32,35 @@ export default function CanvasEditor({ image, frame, isIphone, onResetImage, onR
     img.onload = () => {
       if (!frameImage) return;
 
-      const scaledWidth = frameImage.width;
-      const scaledHeight = frameImage.height;
-      canvas.width = scaledWidth;
-      canvas.height = scaledHeight;
+      canvas.width = img.width;
+      canvas.height = img.height;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       ctx.save();
       ctx.translate(canvas.width / 2 + position.x, canvas.height / 2 + position.y);
       ctx.rotate((rotation * Math.PI) / 180);
 
-      const frameAspect = frameImage.width / frameImage.height;
-      const imageAspect = img.width / img.height;
-      let drawWidth, drawHeight;
-
-      if (imageAspect > frameAspect) {
-        drawWidth = scaledWidth * scale;
-        drawHeight = (scaledWidth / imageAspect) * scale;
-      } else {
-        drawHeight = scaledHeight * scale;
-        drawWidth = (scaledHeight * imageAspect) * scale;
-      }
+      const drawWidth = img.width * scale;
+      const drawHeight = img.height * scale;
 
       ctx.drawImage(img, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight);
       ctx.restore();
 
-      ctx.drawImage(frameImage, 0, 0, scaledWidth, scaledHeight);
+      ctx.drawImage(frameImage, 0, 0, canvas.width, canvas.height);
     };
     img.src = image;
   }, [image, frameImage, scale, rotation, position]);
 
   const getCanvasPos = (e) => {
-    const rect = canvasRef.current.getBoundingClientRect();
+    const canvas = canvasRef.current;
+    const rect = canvas.getBoundingClientRect();
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
     return {
-      x: clientX - rect.left,
-      y: clientY - rect.top,
+      x: (clientX - rect.left) * scaleX,
+      y: (clientY - rect.top) * scaleY,
     };
   };
 
@@ -126,14 +125,14 @@ export default function CanvasEditor({ image, frame, isIphone, onResetImage, onR
   };
 
   const download = () => {
-    const url = canvasRef.current.toDataURL("image/png");
+    const url = canvasRef.current.toDataURL("image/jpeg", quality);
     if (isIphone) {
       const imgWindow = window.open();
       imgWindow.document.write(`<img src="${url}" style="width:100%" />`);
     } else {
       const a = document.createElement("a");
       a.href = url;
-      a.download = "framed_image.png";
+      a.download = "framed_image.jpeg";
       a.click();
     }
   };
@@ -164,6 +163,19 @@ export default function CanvasEditor({ image, frame, isIphone, onResetImage, onR
           step="1"
           value={rotation}
           onChange={(e) => setRotation(parseInt(e.target.value))}
+          className="w-full"
+        />
+      </div>
+
+      <div className="flex flex-col gap-2 mt-2">
+        <label className="text-sm">圖片品質(建議 65%)：</label>
+        <input
+          type="range"
+          min="0.1"
+          max="1"
+          step="0.01"
+          value={quality}
+          onChange={(e) => setQuality(parseFloat(e.target.value))}
           className="w-full"
         />
       </div>

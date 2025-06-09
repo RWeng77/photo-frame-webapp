@@ -4,7 +4,7 @@ import CanvasEditor from "./components/CanvasEditor";
 
 export default function App() {
   const [image, setImage] = useState(null);
-  const [frame, setFrame] = useState("/photo-frame-webapp/frames/frame1.png");
+  const [frame, setFrame] = useState("/frames/frame1.png");
   const [showFrames, setShowFrames] = useState(false);
   const [frameSelected, setFrameSelected] = useState(false);
   const [editingMode, setEditingMode] = useState(false);
@@ -39,8 +39,8 @@ export default function App() {
       className="flex flex-col justify-between w-full min-h-screen bg-cover bg-center text-white transition-all duration-500"
       style={{
         backgroundImage: showFrames
-          ? "url('/photo-frame-webapp/background/background2.jpg')"
-          : "url('/photo-frame-webapp/background/background1.png')",
+          ? "url('/background/background2.jpg')"
+          : "url('/background/background1.png')",
         fontFamily: "SimSun, '宋体', serif"
       }}
     >
